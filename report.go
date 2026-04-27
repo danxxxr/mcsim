@@ -52,6 +52,7 @@ func (s *Simulator) GenerateReport(res MCResults) string {
 	line("Speed:         %.0f simulations/sec", res.SimsPerSecond)
 	line("")
 
+	// Percentile sets for each metric
 	type pctSet struct{ p5, p50, p95 float64 }
 	calc := func(data []float64) pctSet {
 		s := sortedCopy(data)
@@ -133,6 +134,7 @@ func (s *Simulator) GenerateReport(res MCResults) string {
 	line("  Losing simulations:       %.2f%%", lossCount/n*100)
 	line("  Ruin (>50%% loss):         %.2f%%", ruinCount/n*100)
 
+	// VaR and CVaR calculated on return distribution
 	sortedRet := sortedCopy(res.ReturnsPercent)
 	var95 := percentile(sortedRet, 5) * 100
 	var99 := percentile(sortedRet, 1) * 100
