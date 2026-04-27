@@ -48,8 +48,11 @@ func DefaultParams() TradingParameters {
 	}
 }
 
+// ValidateParams validates the parameters.
+// Returns a list of critical errors and warnings.
+// If errors is non-empty — simulation cannot be started.
 func ValidateParams(p TradingParameters) (errors []string, warnings []string) {
-
+	// Critical errors (simulation is pointless)
 	if p.WinRate < 0 || p.WinRate > 1 {
 		errors = append(errors,
 			fmt.Sprintf("win_rate = %.4f — must be in range [0.0, 1.0]", p.WinRate))
@@ -104,7 +107,7 @@ func ValidateParams(p TradingParameters) (errors []string, warnings []string) {
 		errors = append(errors,
 			fmt.Sprintf("svg_max_curves = %d — must be greater than 0", p.SVGMaxCurves))
 	}
-
+	// Warnings (simulation will run, but results may be unexpected)
 	if p.Commission < 0 {
 		warnings = append(warnings,
 			fmt.Sprintf("commission = %.4f is negative — commission will increase profit", p.Commission))
@@ -138,6 +141,7 @@ func ValidateParams(p TradingParameters) (errors []string, warnings []string) {
 	return errors, warnings
 }
 
+// LoadConfig reads parameters from an INI file.
 func LoadConfig(path string) (TradingParameters, []string, error) {
 	p := DefaultParams()
 	var parseErrors []string
@@ -272,6 +276,7 @@ func LoadConfig(path string) (TradingParameters, []string, error) {
 	return p, parseErrors, scanner.Err()
 }
 
+// WriteDefaultConfig creates config.ini with detailed comments.
 func WriteDefaultConfig(path string) error {
 	content := `# ============================================================
 # Monte Carlo Simulator — Configuration file
