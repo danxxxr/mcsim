@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// SimResult holds the results of a single simulation run.
 type SimResult struct {
 	FinalBalance        float64
 	ReturnPct           float64
@@ -21,6 +22,7 @@ type SimResult struct {
 	MaxTradesToRecovery int
 }
 
+// MCResults holds the aggregated results of all Monte Carlo simulations.
 type MCResults struct {
 	FinalBalances       []float64
 	ReturnsPercent      []float64
@@ -35,6 +37,7 @@ type MCResults struct {
 	SimsPerSecond       float64
 }
 
+// Simulator runs Monte Carlo simulations with the given parameters.
 type Simulator struct {
 	params TradingParameters
 	rng    *rand.Rand
@@ -66,7 +69,7 @@ func (s *Simulator) RunSingle() SimResult {
 
 	for i := 0; i < p.TradeCount; i++ {
 		actualTrades++
-
+		// Balance reached zero — simulation is dead
 		if balance <= 0 {
 			balance = 0
 			if p.SaveSVGFile {
@@ -78,7 +81,7 @@ func (s *Simulator) RunSingle() SimResult {
 		if p.UseCompounding {
 			positionSize = balance * p.RiskPercent
 		}
-
+		// Do not risk more than the current balance
 		if positionSize > balance {
 			positionSize = balance
 		}
@@ -94,7 +97,7 @@ func (s *Simulator) RunSingle() SimResult {
 				if rr < 0 {
 					rr = 0
 				}
-			default:
+			default: // "fixed"
 				rr = p.WinMultiplier
 			}
 			gross := positionSize * rr
@@ -109,7 +112,7 @@ func (s *Simulator) RunSingle() SimResult {
 			gross := positionSize
 			net := gross + positionSize*p.Commission
 			balance -= net
-
+			// Floor at zero — balance cannot go negative
 			if balance < 0 {
 				balance = 0
 			}
@@ -182,6 +185,7 @@ func (s *Simulator) RunMonteCarlo() MCResults {
 		WinningTrades:       make([]int, n),
 	}
 
+	// Allocate equity curves only if SVG output is enabled
 	if s.params.SaveSVGFile {
 		res.EquityCurves = make([][]float64, n)
 	}
@@ -217,7 +221,7 @@ func (s *Simulator) RunMonteCarlo() MCResults {
 				res.MaxLossStreaks[i] = r.MaxLossStreak
 				res.MaxTradesToRecovery[i] = r.MaxTradesToRecovery
 				res.WinningTrades[i] = r.WinningTrades
-
+				// Store equity curve only if SVG output is enabled
 				if workerSim.params.SaveSVGFile {
 					res.EquityCurves[i] = r.EquityCurve
 				}
