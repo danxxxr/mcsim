@@ -17,6 +17,7 @@ func SaveCSV(res MCResults, path string) error {
 	}
 	defer f.Close()
 
+	// Write UTF-8 BOM for Excel compatibility
 	if _, err := f.WriteString("\xef\xbb\xbf"); err != nil {
 		return fmt.Errorf("failed to write BOM: %w", err)
 	}
@@ -32,6 +33,7 @@ func SaveCSV(res MCResults, path string) error {
 		return fmt.Errorf("failed to write CSV headers: %w", err)
 	}
 
+	// Use comma as decimal separator for Excel compatibility
 	ff := func(v float64) string {
 		return strings.ReplaceAll(strconv.FormatFloat(v, 'f', 4, 64), ".", ",")
 	}
@@ -61,6 +63,7 @@ func SaveCSV(res MCResults, path string) error {
 	return nil
 }
 
+// SaveSVG saves an SVG chart of equity curves to the given path.
 func SaveSVG(res MCResults, params TradingParameters, path string) error {
 	const W, H = 1100, 620
 	const padL, padR, padT, padB = 90, 40, 30, 50
@@ -85,8 +88,12 @@ func SaveSVG(res MCResults, params TradingParameters, path string) error {
 		maxCurves = params.SimulationCount
 	}
 
+	// Ruin threshold: with compounding balance never reaches exact 0 in float64,
+	// so we treat a drop below 0.01% of initial balance as ruin.
 	ruinThreshold := params.InitialBalance * 0.0001
 
+	// firstRuinTrade returns the trade index where balance first dropped below
+	// the ruin threshold. Returns len(curve) if ruin never occurred.
 	firstRuinTrade := func(curve []float64) int {
 		for i, v := range curve {
 			if v <= ruinThreshold {
@@ -96,6 +103,9 @@ func SaveSVG(res MCResults, params TradingParameters, path string) error {
 		return len(curve)
 	}
 
+	// curveArea returns the sum of all balance values (area under the curve).
+	// Used as a tiebreaker when two curves have the same final balance:
+	// larger area = stayed higher longer = better trajectory.
 	curveArea := func(curve []float64) float64 {
 		s := 0.0
 		for _, v := range curve {
@@ -104,6 +114,8 @@ func SaveSVG(res MCResults, params TradingParameters, path string) error {
 		return s
 	}
 
+	// Sort by final balance to match report percentiles.
+	// Tiebreaker 1: curve area. Tiebreaker 2: firstRuinTrade.
 	n := len(res.FinalBalances)
 	sortedIdx := make([]int, n)
 	for i := range sortedIdx {
@@ -128,6 +140,8 @@ func SaveSVG(res MCResults, params TradingParameters, path string) error {
 	idx50 := sortedIdx[int(0.50*float64(n-1))]
 	idx95 := sortedIdx[int(0.95*float64(n-1))]
 
+	// Find min/max balance across all displayed and percentile curves.
+	// Only positive values are considered (balance >= 0).
 	minB, maxB := math.MaxFloat64, -math.MaxFloat64
 	for i := 0; i < maxCurves; i++ {
 		idx := i * params.SimulationCount / maxCurves
@@ -163,6 +177,8 @@ func SaveSVG(res MCResults, params TradingParameters, path string) error {
 		return float64(padL) + float64(trade)/float64(tradeCount)*float64(plotW)
 	}
 
+	// Use log scale with compounding — curves don't cluster at the bottom
+	// and a 100x range reads evenly. Use linear scale for fixed position size.
 	useLogScale := params.UseCompounding && maxB/minB > 5
 
 	var toY func(bal float64) float64
@@ -188,7 +204,7 @@ func SaveSVG(res MCResults, params TradingParameters, path string) error {
 			}
 			return float64(padT+plotH) - frac*float64(plotH)
 		}
-
+		// Y axis labels: powers of 10 with 2x and 5x intermediates
 		for exp := int(math.Floor(logMin)); exp <= int(math.Ceil(logMax)); exp++ {
 			v := math.Pow(10, float64(exp))
 			if v >= math.Pow(10, logMin)*0.9 && v <= math.Pow(10, logMax)*1.1 {
@@ -225,6 +241,7 @@ func SaveSVG(res MCResults, params TradingParameters, path string) error {
 		}
 	}
 
+	// trimCurve truncates the curve at the first ruin point (inclusive).
 	trimCurve := func(curve []float64) []float64 {
 		for i, v := range curve {
 			if v <= ruinThreshold {
@@ -249,6 +266,7 @@ func SaveSVG(res MCResults, params TradingParameters, path string) error {
 
 	gridColor := "#1e2030"
 
+	// Horizontal grid lines and Y axis labels
 	for _, bal := range yAxisVals {
 		y := toY(bal)
 		fmt.Fprintf(f, `<line x1="%d" y1="%.1f" x2="%d" y2="%.1f" stroke="%s" stroke-width="1"/>`,
@@ -262,6 +280,7 @@ func SaveSVG(res MCResults, params TradingParameters, path string) error {
 			padL-2, padT+12)
 	}
 
+	// Vertical grid lines and X axis labels
 	xSteps := 10
 	for i := 0; i <= xSteps; i++ {
 		trade := int(float64(tradeCount) * float64(i) / float64(xSteps))
@@ -272,35 +291,43 @@ func SaveSVG(res MCResults, params TradingParameters, path string) error {
 			x, padT+plotH+18, trade)
 	}
 
+	// Plot border
 	fmt.Fprintf(f, `<rect x="%d" y="%d" width="%d" height="%d" fill="none" stroke="#2a2a4a" stroke-width="1"/>`,
 		padL, padT, plotW, plotH)
 
+	// Clip path to keep curves inside the plot area
 	fmt.Fprintf(f, `<defs><clipPath id="plot"><rect x="%d" y="%d" width="%d" height="%d"/></clipPath></defs>`,
 		padL, padT, plotW, plotH)
 	fmt.Fprintf(f, `<g clip-path="url(#plot)">`)
 
+	// Background curves — evenly sampled across the sorted distribution
 	for i := 0; i < maxCurves; i++ {
 		idx := i * params.SimulationCount / maxCurves
 		color := bgColors[idx%len(bgColors)]
 		fmt.Fprintln(f, polyline(res.EquityCurves[idx], color, "0.6", "0.15"))
 	}
 
+	// Dashed line at initial balance
 	y0 := toY(params.InitialBalance)
 	fmt.Fprintf(f, `<line x1="%d" y1="%.1f" x2="%d" y2="%.1f" stroke="#ffffff" stroke-width="1" stroke-dasharray="5,5" opacity="0.25"/>`,
 		padL, y0, padL+plotW, y0)
 
+	// Percentile curves drawn in order: median, best, worst
+	// (worst on top as the most critical risk reference)
 	fmt.Fprintln(f, polyline(res.EquityCurves[idx50], "#ffcc00", "2", "0.9"))
 	fmt.Fprintln(f, polyline(res.EquityCurves[idx95], "#44dd77", "2.5", "1"))
 	fmt.Fprintln(f, polyline(res.EquityCurves[idx5], "#ff4444", "2.5", "1"))
 
 	fmt.Fprintf(f, `</g>`)
 
+	// Axis labels
 	cx := float64(padL) + float64(plotW)/2
 	fmt.Fprintf(f, `<text x="%.1f" y="%d" fill="#8888aa" font-size="12" text-anchor="middle">Trade number</text>`,
 		cx, H-8)
 	fmt.Fprintf(f, `<text x="0" y="0" fill="#8888aa" font-size="12" text-anchor="middle" transform="rotate(-90) translate(-%d,%d)">Balance ($)</text>`,
 		padT+plotH/2, 16)
 
+	// Legend
 	legendX := padL + 12
 	legendY := padT + 15
 	items := [][2]string{
