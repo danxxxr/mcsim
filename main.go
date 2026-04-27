@@ -10,6 +10,7 @@ import (
 
 func main() {
 
+	// CLI flags
 	configPath := flag.String("config", "config.ini", "Path to the configuration file")
 	showVersion := flag.Bool("version", false, "Show version")
 	showHelp := flag.Bool("help", false, "Show help")
@@ -70,6 +71,7 @@ func main() {
 		fmt.Printf("[OK] Parameters loaded from %s\n\n", *configPath)
 	}
 
+	// no-save and save-all take priority
 	if *fSaveNone {
 		params.SaveReport = false
 		params.SaveCSVFile = false
@@ -81,6 +83,7 @@ func main() {
 		params.SaveSVGFile = true
 	}
 
+	// Individual flags override config only if explicitly set
 	flag.Visit(func(f *flag.Flag) {
 		switch f.Name {
 		case "balance":
@@ -118,6 +121,7 @@ func main() {
 		}
 	})
 
+	// Stop if there are parse errors
 	if len(parseErrors) > 0 {
 		fmt.Println(strings.Repeat("=", 70))
 		fmt.Println("[X] CONFIGURATION FILE ERRORS — simulation not started")
@@ -131,6 +135,7 @@ func main() {
 	}
 	validationErrors, validationWarnings := ValidateParams(params)
 
+	// Print warnings first
 	if len(validationWarnings) > 0 {
 		fmt.Println(strings.Repeat("=", 70))
 		fmt.Println("[!] WARNINGS")
@@ -141,6 +146,7 @@ func main() {
 		fmt.Println()
 	}
 
+	// Stop if there are critical errors
 	if len(validationErrors) > 0 {
 		fmt.Println(strings.Repeat("=", 70))
 		fmt.Println("[X] CONFIGURATION ERRORS — simulation not started")
@@ -170,6 +176,7 @@ func main() {
 	report := sim.GenerateReport(results)
 	fmt.Println(report)
 
+	// Create output directory before saving
 	if params.SaveReport || params.SaveCSVFile || params.SaveSVGFile {
 		if err := os.MkdirAll(params.OutputDir, 0755); err != nil {
 			fmt.Fprintf(os.Stderr, "Error creating directory %s: %v\n", params.OutputDir, err)
