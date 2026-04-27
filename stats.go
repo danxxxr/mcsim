@@ -5,6 +5,7 @@ import (
 	"sort"
 )
 
+// sortedCopy returns a sorted copy of the input slice.
 func sortedCopy(data []float64) []float64 {
 	c := make([]float64, len(data))
 	copy(c, data)
@@ -12,6 +13,7 @@ func sortedCopy(data []float64) []float64 {
 	return c
 }
 
+// percentile returns the p-th percentile of a sorted slice using linear interpolation.
 func percentile(sorted []float64, p float64) float64 {
 	if len(sorted) == 0 {
 		return 0
@@ -76,6 +78,7 @@ func maxInt(data []int) int {
 	return m
 }
 
+// intsToFloat converts a slice of ints to a slice of float64.
 func intsToFloat(data []int) []float64 {
 	out := make([]float64, len(data))
 	for i, v := range data {
