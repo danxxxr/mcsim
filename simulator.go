@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
+	"math/rand/v2"
 	"runtime"
 	"sync"
 	"sync/atomic"
@@ -46,7 +46,7 @@ type Simulator struct {
 func NewSimulator(params TradingParameters) *Simulator {
 	return &Simulator{
 		params: params,
-		rng:    rand.New(rand.NewSource(time.Now().UnixNano())),
+		rng:    rand.New(rand.NewPCG(uint64(time.Now().UnixNano()), 0)),
 	}
 }
 
@@ -204,8 +204,7 @@ func (s *Simulator) RunMonteCarlo() MCResults {
 		go func(workerID int) {
 			defer wg.Done()
 
-			seed := time.Now().UnixNano() + int64(workerID)*1_000_000
-			rng := rand.New(rand.NewSource(seed))
+			rng := rand.New(rand.NewPCG(uint64(time.Now().UnixNano()), uint64(workerID)))
 			workerSim := &Simulator{
 				params: s.params,
 				rng:    rng,
