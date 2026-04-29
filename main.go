@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -173,7 +174,8 @@ func main() {
 	sim := NewSimulator(params)
 	results := sim.RunMonteCarlo()
 
-	report := sim.GenerateReport(results)
+	timestamp := time.Now().Format("2006-01-02_15-04-05")
+	report := sim.GenerateReport(results, timestamp)
 	fmt.Println(report)
 
 	// Create output directory before saving
@@ -185,7 +187,7 @@ func main() {
 	}
 
 	if params.SaveReport {
-		reportPath := filepath.Join(params.OutputDir, "monte_carlo_report.txt")
+		reportPath := filepath.Join(params.OutputDir, fmt.Sprintf("monte_carlo_report_%s.txt", timestamp))
 		if err := os.WriteFile(reportPath, []byte(report), 0644); err != nil {
 			fmt.Fprintf(os.Stderr, "Report error: %v\n", err)
 		} else {
@@ -194,7 +196,7 @@ func main() {
 	}
 
 	if params.SaveCSVFile {
-		csvPath := filepath.Join(params.OutputDir, "monte_carlo_results.csv")
+		csvPath := filepath.Join(params.OutputDir, fmt.Sprintf("monte_carlo_results_%s.csv", timestamp))
 		if err := SaveCSV(results, csvPath); err != nil {
 			fmt.Fprintf(os.Stderr, "CSV error: %v\n", err)
 		} else {
@@ -203,7 +205,7 @@ func main() {
 	}
 
 	if params.SaveSVGFile {
-		svgPath := filepath.Join(params.OutputDir, "monte_carlo_results.svg")
+		svgPath := filepath.Join(params.OutputDir, fmt.Sprintf("monte_carlo_results_%s.svg", timestamp))
 		fmt.Println("\nGenerating chart...")
 		if err := SaveSVG(results, params, svgPath); err != nil {
 			fmt.Fprintf(os.Stderr, "SVG error: %v\n", err)

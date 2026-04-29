@@ -3,10 +3,9 @@ package main
 import (
 	"fmt"
 	"strings"
-	"time"
 )
 
-func (s *Simulator) GenerateReport(res MCResults) string {
+func (s *Simulator) GenerateReport(res MCResults, timestamp string) string {
 	p := s.params
 	sb := &strings.Builder{}
 
@@ -18,7 +17,7 @@ func (s *Simulator) GenerateReport(res MCResults) string {
 	sep()
 	line("# MONTE CARLO SIMULATION REPORT")
 	sep()
-	line("Date: %s", time.Now().Format("2006-01-02 15:04:05"))
+	line("Date: %s", strings.ReplaceAll(timestamp, "_", " "))
 	line("")
 
 	sep()
