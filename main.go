@@ -11,7 +11,7 @@ import (
 func main() {
 
 	// CLI flags
-	configPath := flag.String("config", "config.ini", "Path to the configuration file")
+	configPath := flag.String("config", "mcsim.ini", "Path to the configuration file")
 	showVersion := flag.Bool("version", false, "Show version")
 	showHelp := flag.Bool("help", false, "Show help")
 	fBalance := flag.Float64("balance", 0, "Initial balance")
