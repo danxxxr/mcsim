@@ -266,11 +266,31 @@ func SaveSVG(res MCResults, params TradingParameters, path string) error {
 
 	gridColor := "#1e2030"
 
+	// Collect percentile Y positions to avoid overlapping grid labels
+	percentileYPos := []float64{
+		toY(res.FinalBalances[idx5]),
+		toY(res.FinalBalances[idx50]),
+		toY(res.FinalBalances[idx95]),
+	}
+
 	// Horizontal grid lines and Y axis labels
 	for _, bal := range yAxisVals {
 		y := toY(bal)
+
+		// Skip label if too close to a percentile label
+		tooClose := false
+		for _, py := range percentileYPos {
+			if math.Abs(y-py) < 10 {
+				tooClose = true
+				break
+			}
+		}
 		fmt.Fprintf(f, `<line x1="%d" y1="%.1f" x2="%d" y2="%.1f" stroke="%s" stroke-width="1"/>`,
 			padL, y, padL+plotW, y, gridColor)
+		if tooClose {
+			continue
+		}
+
 		label := fmt.Sprintf("$%.0f", bal)
 		fmt.Fprintf(f, `<text x="%d" y="%.1f" fill="#5a5a7a" font-size="11" text-anchor="end" dominant-baseline="middle">%s</text>`,
 			padL-8, y, label)
@@ -327,22 +347,31 @@ func SaveSVG(res MCResults, params TradingParameters, path string) error {
 	fmt.Fprintf(f, `<text x="0" y="0" fill="#8888aa" font-size="12" text-anchor="middle" transform="rotate(-90) translate(-%d,%d)">Balance ($)</text>`,
 		padT+plotH/2, 16)
 
-	// Legend
-	legendX := padL + 12
-	legendY := padT + 15
-	items := [][2]string{
-		{"#44dd77", fmt.Sprintf("Best 95%%   ($%.0f)", res.FinalBalances[idx95])},
-		{"#ffcc00", fmt.Sprintf("Median      ($%.0f)", res.FinalBalances[idx50])},
-		{"#ff4444", fmt.Sprintf("Worst 5%%   ($%.0f)", res.FinalBalances[idx5])},
+	// Percentile labels on Y axis with dashed reference lines
+	type yLabel struct {
+		idx   int
+		color string
+		label string
 	}
-	fmt.Fprintf(f, `<rect x="%d" y="%d" width="205" height="72" fill="#0a0c12" fill-opacity="0.85" rx="5" stroke="#2a2a4a" stroke-width="1"/>`,
-		legendX-8, legendY-8)
-	for i, item := range items {
-		ly := legendY + i*22
-		fmt.Fprintf(f, `<line x1="%d" y1="%d" x2="%d" y2="%d" stroke="%s" stroke-width="2.5"/>`,
-			legendX, ly+6, legendX+22, ly+6, item[0])
-		fmt.Fprintf(f, `<text x="%d" y="%d" fill="#c8c8e0" font-size="11">%s</text>`,
-			legendX+28, ly+10, item[1])
+	yLabels := []yLabel{
+		{idx95, "#44dd77", fmt.Sprintf("$%.0f", res.FinalBalances[idx95])},
+		{idx50, "#ffcc00", fmt.Sprintf("$%.0f", res.FinalBalances[idx50])},
+		{idx5, "#ff4444", fmt.Sprintf("$%.0f", res.FinalBalances[idx5])},
+	}
+
+	for _, lbl := range yLabels {
+		curve := res.EquityCurves[lbl.idx]
+		finalBalance := curve[len(curve)-1]
+		yPos := toY(finalBalance)
+		xEnd := float64(padL + plotW)
+
+		// Dashed horizontal line from end of curve to Y axis
+		fmt.Fprintf(f, `<line x1="%.1f" y1="%.1f" x2="%d" y2="%.1f" stroke="%s" stroke-width="1" stroke-dasharray="3,4" opacity="0.6"/>`,
+			xEnd, yPos, padL, yPos, lbl.color)
+
+		// Label on Y axis
+		fmt.Fprintf(f, `<text x="%d" y="%.1f" fill="%s" font-size="11" text-anchor="end" dominant-baseline="middle">%s</text>`,
+			padL-8, yPos, lbl.color, lbl.label)
 	}
 
 	fmt.Fprintf(f, `</svg>`)
