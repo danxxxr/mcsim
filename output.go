@@ -144,7 +144,7 @@ func SaveSVG(res MCResults, params TradingParameters, path string) error {
 	// Only positive values are considered (balance >= 0).
 	minB, maxB := math.MaxFloat64, -math.MaxFloat64
 	for i := 0; i < maxCurves; i++ {
-		idx := i * params.SimulationCount / maxCurves
+		idx := sortedIdx[(i*n+n/2)/maxCurves]
 		for _, v := range res.EquityCurves[idx] {
 			if v > 0 && v < minB {
 				minB = v
@@ -280,7 +280,7 @@ func SaveSVG(res MCResults, params TradingParameters, path string) error {
 		// Skip label if too close to a percentile label
 		tooClose := false
 		for _, py := range percentileYPos {
-			if math.Abs(y-py) < 10 {
+			if math.Abs(y-py) < 14 {
 				tooClose = true
 				break
 			}
@@ -322,7 +322,7 @@ func SaveSVG(res MCResults, params TradingParameters, path string) error {
 
 	// Background curves — evenly sampled across the sorted distribution
 	for i := 0; i < maxCurves; i++ {
-		idx := i * params.SimulationCount / maxCurves
+		idx := sortedIdx[(i*n+n/2)/maxCurves]
 		color := bgColors[idx%len(bgColors)]
 		fmt.Fprintln(f, polyline(res.EquityCurves[idx], color, "0.6", "0.15"))
 	}
@@ -332,11 +332,11 @@ func SaveSVG(res MCResults, params TradingParameters, path string) error {
 	fmt.Fprintf(f, `<line x1="%d" y1="%.1f" x2="%d" y2="%.1f" stroke="#ffffff" stroke-width="1" stroke-dasharray="5,5" opacity="0.25"/>`,
 		padL, y0, padL+plotW, y0)
 
-	// Percentile curves drawn in order: median, best, worst
+	// Percentile curves drawn in order: best, median, worst
 	// (worst on top as the most critical risk reference)
-	fmt.Fprintln(f, polyline(res.EquityCurves[idx50], "#ffcc00", "2", "0.9"))
-	fmt.Fprintln(f, polyline(res.EquityCurves[idx95], "#44dd77", "2.5", "1"))
-	fmt.Fprintln(f, polyline(res.EquityCurves[idx5], "#ff4444", "2.5", "1"))
+	fmt.Fprintln(f, polyline(res.EquityCurves[idx95], "#44dd77", "2", "1"))
+	fmt.Fprintln(f, polyline(res.EquityCurves[idx50], "#ffcc00", "2", "1"))
+	fmt.Fprintln(f, polyline(res.EquityCurves[idx5], "#ff4444", "2", "1"))
 
 	fmt.Fprintf(f, `</g>`)
 
