@@ -1,0 +1,77 @@
+======================================================================
+# MONTE CARLO SIMULATION REPORT
+======================================================================
+Date: 2026-04-30 17-45-22
+
+======================================================================
+# SIMULATION PARAMETERS
+======================================================================
+Initial balance:     $10000.00
+Win rate:            65.0%
+Reward:risk:         1.00
+Risk per trade:      1.00%
+Commission:          0.00%
+Compounding:         Yes
+Trade count:         100
+Simulation count:    1000
+RR model:            normal
+RR sigma:            0.05 (±5%)
+
+======================================================================
+# PERFORMANCE
+======================================================================
+Elapsed time:  0.01 sec
+Speed:         127966 simulations/sec
+
+======================================================================
+# RESULTS (5% / Median / 95%)
+======================================================================
+│ Worst (5%)
+├─ Final balance:           $11538.92
+├─ Return:                  +15.39%
+├─ Max drawdown:            7.84%
+├─ Win rate:                57.0%
+├─ Max win streak:          6
+├─ Max loss streak:         6
+└─ Max TTR:                 42
+
+│ Median (50%)
+├─ Final balance:           $13424.35
+├─ Return:                  +34.24%
+├─ Max drawdown:            4.87%
+├─ Win rate:                65.0%
+├─ Max win streak:          9
+├─ Max loss streak:         4
+└─ Max TTR:                 18
+
+│ Best (95%)
+├─ Final balance:           $15673.96
+├─ Return:                  +56.74%
+├─ Max drawdown:            2.97%
+├─ Win rate:                73.0%
+├─ Max win streak:          14
+├─ Max loss streak:         2
+└─ Max TTR:                 8
+
+======================================================================
+# WORST CASE VALUES
+======================================================================
+Largest drawdown:           13.17%
+Longest loss streak:        9 consecutive losses
+Longest TTR:                72 trades to recovery
+
+[!] Be prepared for these scenarios!
+
+======================================================================
+# RISK ANALYSIS
+======================================================================
+Probabilities:
+  Profitable simulations:   99.90%
+  Losing simulations:       0.10%
+  Ruin (>50% loss):         0.00%
+
+Value at Risk (95%):        15.39%
+Value at Risk (99%):        5.56%
+CVaR (95%):                 10.84%
+Sharpe ratio:               2.73
+======================================================================

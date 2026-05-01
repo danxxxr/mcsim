@@ -3,3 +3,4 @@ mcsim.exe
 *.ini
 *.csv
 *.svg
+!examples/**
