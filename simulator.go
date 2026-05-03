@@ -85,7 +85,9 @@ func (s *Simulator) RunSingle() SimResult {
 		if positionSize > balance {
 			positionSize = balance
 		}
-		isWin := s.rng.Float64() < p.WinRate
+		roll := s.rng.Float64()
+		isWin := roll < p.WinRate
+		isBreakeven := !isWin && roll < p.WinRate+p.BreakevenPercent
 		if isWin {
 			winningCount++
 			var rr float64
@@ -108,6 +110,14 @@ func (s *Simulator) RunSingle() SimResult {
 			if winStreak > maxWinStreak {
 				maxWinStreak = winStreak
 			}
+		} else if isBreakeven {
+			// Balance unchanged, only commission is charged
+			balance -= positionSize * p.Commission
+			if balance < 0 {
+				balance = 0
+			}
+			winStreak = 0
+			lossStreak = 0
 		} else {
 			gross := positionSize
 			net := gross + positionSize*p.Commission
