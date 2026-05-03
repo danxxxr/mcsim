@@ -16,8 +16,11 @@ func main() {
 	showVersion := flag.Bool("version", false, "Show version")
 	showHelp := flag.Bool("help", false, "Show help")
 	fBalance := flag.Float64("balance", 0, "Initial balance")
+	flag.Float64Var(fBalance, "b", 0, "Initial balance (alias -balance)")
 	fWinRate := flag.Float64("win-rate", 0, "Win rate % (0.65 = 65%)")
 	flag.Float64Var(fWinRate, "w", 0, "Win rate % (alias -win-rate)")
+	fBreakeven := flag.Float64("breakeven", 0, "Breakeven trades rate (0.05 = 5%)")
+	flag.Float64Var(fBreakeven, "be", 0, "Breakeven trades rate (alias -breakeven)")
 	fMultiplier := flag.Float64("rr", 0, "Reward:risk (1.5 = 1.5:1)")
 	fRisk := flag.Float64("risk", 0, "Risk per trade % (0.01 = 1%)")
 	flag.Float64Var(fRisk, "r", 0, "Risk per trade % (alias -risk)")
@@ -91,6 +94,8 @@ func main() {
 			params.InitialBalance = *fBalance
 		case "win-rate", "w":
 			params.WinRate = *fWinRate
+		case "breakeven", "be":
+			params.BreakevenPercent = *fBreakeven
 		case "rr":
 			params.WinMultiplier = *fMultiplier
 		case "risk", "r":
