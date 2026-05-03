@@ -9,42 +9,44 @@ import (
 )
 
 type TradingParameters struct {
-	InitialBalance  float64
-	WinRate         float64
-	WinMultiplier   float64
-	RiskPercent     float64
-	TradeCount      int
-	SimulationCount int
-	Commission      float64
-	UseCompounding  bool
-	SaveReport      bool
-	SaveCSVFile     bool
-	SaveSVGFile     bool
-	RRModel         string
-	RRDeviation     float64
-	RRSigma         float64
-	SVGMaxCurves    int
-	OutputDir       string
+	InitialBalance   float64
+	WinRate          float64
+	BreakevenPercent float64
+	WinMultiplier    float64
+	RiskPercent      float64
+	TradeCount       int
+	SimulationCount  int
+	Commission       float64
+	UseCompounding   bool
+	SaveReport       bool
+	SaveCSVFile      bool
+	SaveSVGFile      bool
+	RRModel          string
+	RRDeviation      float64
+	RRSigma          float64
+	SVGMaxCurves     int
+	OutputDir        string
 }
 
 func DefaultParams() TradingParameters {
 	return TradingParameters{
-		InitialBalance:  10000,
-		WinRate:         0.65,
-		WinMultiplier:   1.0,
-		RiskPercent:     0.01,
-		TradeCount:      100,
-		SimulationCount: 1000,
-		Commission:      0.0,
-		UseCompounding:  true,
-		SaveReport:      true,
-		SaveCSVFile:     true,
-		SaveSVGFile:     true,
-		RRModel:         "fixed",
-		RRDeviation:     0.1,
-		RRSigma:         0.1,
-		SVGMaxCurves:    200,
-		OutputDir:       ".",
+		InitialBalance:   10000,
+		WinRate:          0.65,
+		BreakevenPercent: 0.0,
+		WinMultiplier:    1.0,
+		RiskPercent:      0.01,
+		TradeCount:       100,
+		SimulationCount:  1000,
+		Commission:       0.0,
+		UseCompounding:   true,
+		SaveReport:       true,
+		SaveCSVFile:      true,
+		SaveSVGFile:      true,
+		RRModel:          "fixed",
+		RRDeviation:      0.1,
+		RRSigma:          0.1,
+		SVGMaxCurves:     200,
+		OutputDir:        ".",
 	}
 }
 
@@ -56,6 +58,16 @@ func ValidateParams(p TradingParameters) (errors []string, warnings []string) {
 	if p.WinRate < 0 || p.WinRate > 1 {
 		errors = append(errors,
 			fmt.Sprintf("win_rate = %.4f — must be in range [0.0, 1.0]", p.WinRate))
+	}
+
+	if p.BreakevenPercent < 0 {
+		errors = append(errors,
+			fmt.Sprintf("breakeven_percent = %.4f — must be greater than or equal to 0", p.BreakevenPercent))
+	}
+
+	if p.BreakevenPercent+p.WinRate > 1 {
+		errors = append(errors,
+			fmt.Sprintf("win_rate + breakeven_percent = %.4f — cannot exceed 1.0", p.WinRate+p.BreakevenPercent))
 	}
 
 	if p.RiskPercent <= 0 {
@@ -189,6 +201,14 @@ func LoadConfig(path string) (TradingParameters, []string, error) {
 					fmt.Sprintf("win_rate = %q — expected a number (e.g. 0.65)", val))
 			}
 
+		case "breakeven_percent":
+			if v, err := strconv.ParseFloat(val, 64); err == nil {
+				p.BreakevenPercent = v
+			} else {
+				parseErrors = append(parseErrors,
+					fmt.Sprintf("breakeven_percent = %q — expected a number (e.g. 0.1)", val))
+			}
+
 		case "win_multiplier":
 			if v, err := strconv.ParseFloat(val, 64); err == nil {
 				p.WinMultiplier = v
@@ -292,6 +312,9 @@ initial_balance = 10000
 # Win rate (0.65 = 65%)
 win_rate = 0.65
 
+# Breakeven trades rate (0.05 = 5%), 0 = disabled
+breakeven_percent = 0.0
+
 # Reward:risk ratio (1.5 = 1.5:1)
 win_multiplier = 1.0
 
@@ -304,7 +327,7 @@ trade_count = 100
 # Number of Monte Carlo simulations
 simulation_count = 1000
 
-# Broker commission (0.001 = 0.1%), 0 = no commission
+# Broker commission (0.01 = 1%), 0 = no commission
 commission = 0.0
 
 # Reinvest profits: true = compounding, false = fixed size
@@ -331,12 +354,12 @@ save_report = true
 save_csv = true
 
 # Save SVG chart of equity curves (monte_carlo_results.svg)
-# Note: large simulation_count and trade_count requires a lot of memory
-# simulation_count=100000, trade_count=1000 → ~800 MB
+# Note: large simulation_count, trade_count and svg_max_curves requires a lot of memory
+# simulation_count=100000, trade_count=1000, svg_max_curves=200 → ~800 MB
 save_svg = true
 
 # Maximum background curves on the chart (fewer = smaller file size)
-svg_max_curves = 200
+svg_max_curves = 60
 
 # Directory for saving files (. = current directory)
 output_dir = .

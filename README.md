@@ -36,8 +36,9 @@ On first run, `mcsim.ini` is created with default values. Edit it and run again.
 | Flag | Short | Description |
 |------|-------|-------------|
 | `-config` | | Path to config file (default: `mcsim.ini`) |
-| `-balance` | | Initial balance |
+| `-balance` | `-b` | Initial balance |
 | `-win-rate` | `-w` | Win rate (0.65 = 65%) |
+| `-breakeven` | `-be` | Breakeven trades rate (0.05 = 5%) |
 | `-rr` | | Reward:risk ratio (1.5 = 1.5:1) |
 | `-risk` | `-r` | Risk per trade (0.01 = 1%) |
 | `-trades` | `-t` | Number of trades |
@@ -65,6 +66,7 @@ On first run, `mcsim.ini` is created with default values. Edit it and run again.
 [simulation]
 initial_balance = 10000
 win_rate = 0.65
+breakeven_percent = 0.0
 win_multiplier = 1.0
 risk_percent = 0.01
 trade_count = 100
@@ -79,7 +81,7 @@ rr_sigma = 0.1
 save_report = true
 save_csv = true
 save_svg = true
-svg_max_curves = 200
+svg_max_curves = 60
 output_dir = .
 ```
 
