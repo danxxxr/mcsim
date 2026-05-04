@@ -28,6 +28,8 @@ func (s *Simulator) GenerateReport(res MCResults, timestamp string) string {
 	if p.BreakevenPercent > 0 {
 		line("Breakeven:           %.1f%%", p.BreakevenPercent*100)
 	}
+	ev := p.WinRate*p.WinMultiplier - (1 - p.WinRate - p.BreakevenPercent)
+	line("Expected Value:      %+.2f%%", ev*p.RiskPercent*100)
 	line("Reward:risk:         %.2f", p.WinMultiplier)
 	line("Risk per trade:      %.2f%%", p.RiskPercent*100)
 	line("Commission:          %.2f%%", p.Commission*100)
