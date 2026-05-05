@@ -46,6 +46,8 @@ func main() {
 	flag.BoolVar(fSaveAll, "sa", false, "Save all (report, CSV, SVG) (alias -save-all)")
 	fOutputDir := flag.String("output", ".", "Directory for saving files")
 	flag.StringVar(fOutputDir, "o", ".", "Directory for saving files (alias -output)")
+	fInteractive := flag.Bool("interactive", false, "Interactive setup mode")
+	flag.BoolVar(fInteractive, "i", false, "Interactive setup mode (alias -interactive)")
 
 	flag.Parse()
 
@@ -126,6 +128,10 @@ func main() {
 			params.OutputDir = *fOutputDir
 		}
 	})
+
+	if *fInteractive {
+		params = InteractiveSetup(params)
+	}
 
 	// Stop if there are parse errors
 	if len(parseErrors) > 0 {
