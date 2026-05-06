@@ -86,3 +86,17 @@ func intsToFloat(data []int) []float64 {
 	}
 	return out
 }
+
+// pctSet holds the 5th, 50th, and 95th percentile values for a metric.
+type pctSet struct{ p5, p50, p95 float64 }
+
+// calcPct returns the 5th, 50th, and 95th percentiles of a float64 slice.
+func calcPct(data []float64) pctSet {
+	s := sortedCopy(data)
+	return pctSet{percentile(s, 5), percentile(s, 50), percentile(s, 95)}
+}
+
+// calcPctInt returns the 5th, 50th, and 95th percentiles of an int slice.
+func calcPctInt(data []int) pctSet {
+	return calcPct(intsToFloat(data))
+}
