@@ -48,6 +48,9 @@ func main() {
 	flag.StringVar(fOutputDir, "o", ".", "Directory for saving files (alias -output)")
 	fInteractive := flag.Bool("interactive", false, "Interactive setup mode")
 	flag.BoolVar(fInteractive, "i", false, "Interactive setup mode (alias -interactive)")
+	fStress := flag.Bool("stress", false, "Run stress test")
+	flag.BoolVar(fStress, "st", false, "Run stress test (alias -stress)")
+	fStressSteps := flag.String("stress-steps", "10,20,30", "Stress test steps in percent (e.g. 5,15,25)")
 
 	flag.Parse()
 
@@ -182,10 +185,35 @@ func main() {
 	fmt.Printf("• Trade count:        %d\n", params.TradeCount)
 	fmt.Printf("• Simulation count:   %d\n\n", params.SimulationCount)
 
+	timestamp := time.Now().Format("2006-01-02_15-04-05")
+
+	// Stress test — runs instead of main simulation
+	if *fStress {
+		fmt.Println("\nRunning stress test...")
+		steps := parseStressSteps(*fStressSteps)
+		scenarios := RunStressTest(params, steps)
+		stressReport := GenerateStressReport(scenarios)
+		fmt.Println(stressReport)
+
+		if params.SaveReport {
+			if err := os.MkdirAll(params.OutputDir, 0755); err != nil {
+				fmt.Fprintf(os.Stderr, "Error creating directory %s: %v\n", params.OutputDir, err)
+				os.Exit(1)
+			}
+			stressPath := filepath.Join(params.OutputDir, fmt.Sprintf("monte_carlo_stress_%s.txt", timestamp))
+			if err := os.WriteFile(stressPath, []byte(stressReport), 0644); err != nil {
+				fmt.Fprintf(os.Stderr, "Stress report error: %v\n", err)
+			} else {
+				fmt.Printf("[OK] Stress report saved: %s\n", stressPath)
+			}
+		}
+		fmt.Println("\n[OK] Done!")
+		os.Exit(0)
+	}
+
+	// Main simulation
 	sim := NewSimulator(params)
 	results := sim.RunMonteCarlo()
-
-	timestamp := time.Now().Format("2006-01-02_15-04-05")
 	report := sim.GenerateReport(results, timestamp)
 	fmt.Println(report)
 
