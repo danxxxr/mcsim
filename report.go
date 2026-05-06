@@ -57,20 +57,13 @@ func (s *Simulator) GenerateReport(res MCResults, timestamp string) string {
 	line("")
 
 	// Percentile sets for each metric
-	type pctSet struct{ p5, p50, p95 float64 }
-	calc := func(data []float64) pctSet {
-		s := sortedCopy(data)
-		return pctSet{percentile(s, 5), percentile(s, 50), percentile(s, 95)}
-	}
-	calcI := func(data []int) pctSet { return calc(intsToFloat(data)) }
-
-	bal := calc(res.FinalBalances)
-	ret := calc(res.ReturnsPercent)
-	dd := calc(res.MaxDrawdowns)
-	wr := calc(res.WinRates)
-	mws := calcI(res.MaxWinStreaks)
-	mls := calcI(res.MaxLossStreaks)
-	ttr := calcI(res.MaxTradesToRecovery)
+	bal := calcPct(res.FinalBalances)
+	ret := calcPct(res.ReturnsPercent)
+	dd := calcPct(res.MaxDrawdowns)
+	wr := calcPct(res.WinRates)
+	mws := calcPctInt(res.MaxWinStreaks)
+	mls := calcPctInt(res.MaxLossStreaks)
+	ttr := calcPctInt(res.MaxTradesToRecovery)
 
 	sep()
 	line("# RESULTS (5%% / Median / 95%%)")
