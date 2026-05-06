@@ -27,6 +27,9 @@ On first run, `mcsim.ini` is created with default values. Edit it and run again.
 ./mcsim -config my.ini
 ./mcsim -no-save
 ./mcsim -save-all -output ./results
+./mcsim -interactive
+./mcsim -stress
+./mcsim -stress -stress-steps 5,15,25
 ./mcsim -version
 ./mcsim -help
 ```
@@ -55,6 +58,9 @@ On first run, `mcsim.ini` is created with default values. Edit it and run again.
 | `-no-save` | `-n` | Output to console only, save nothing |
 | `-save-all` | `-sa` | Save report, CSV and SVG |
 | `-output` | `-o` | Output directory |
+| `-stress` | `-st` | Run stress test |
+| `-stress-steps` | | Stress test steps in percent (default: `10,20,30`) |
+| `-interactive` | `-i` | Interactive setup mode |
 | `-version` | | Show version |
 | `-help` | | Show help |
 
@@ -67,7 +73,7 @@ On first run, `mcsim.ini` is created with default values. Edit it and run again.
 initial_balance = 10000
 win_rate = 0.65
 breakeven_percent = 0.0
-win_multiplier = 1.0
+win_multiplier = 1.5
 risk_percent = 0.01
 trade_count = 100
 simulation_count = 1000
@@ -85,6 +91,26 @@ svg_max_curves = 60
 output_dir = .
 ```
 
+## Stress Test
+
+Run stress test to see how your strategy performs under progressively worse conditions. Stress test runs instead of the main simulation.
+
+```
+./mcsim -stress
+./mcsim -stress -stress-steps 5,15,25
+./mcsim -stress -no-save
+./mcsim -stress -save-report -output ./results
+```
+
+## Interactive Mode
+
+Set parameters interactively without editing the config file:
+
+```
+./mcsim -interactive
+./mcsim -i
+```
+
 ## Output
 
 | File | Description |
@@ -92,6 +118,7 @@ output_dir = .
 | `monte_carlo_report_<timestamp>.txt` | Full statistics report |
 | `monte_carlo_results_<timestamp>.csv` | Raw simulation data |
 | `monte_carlo_results_<timestamp>.svg` | Equity curves chart |
+| `monte_carlo_stress_<timestamp>.txt` | Stress test report |
 
 ## License
 
