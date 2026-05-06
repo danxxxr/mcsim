@@ -1,6 +1,8 @@
-mcsim.exe
+mcsim*
 *.txt
 *.ini
 *.csv
 *.svg
 !examples/**
+versioninfo.json
+*.syso
