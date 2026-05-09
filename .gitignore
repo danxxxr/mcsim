@@ -4,5 +4,4 @@ mcsim*
 *.csv
 *.svg
 !examples/**
-versioninfo.json
 *.syso
