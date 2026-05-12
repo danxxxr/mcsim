@@ -16,14 +16,14 @@
     "Comments": "https://github.com/danxxxr/mcsim",
     "CompanyName": "danxxxr",
     "FileDescription": "Monte Carlo simulator for trading systems",
-    "FileVersion": "1.2.0.0",
+    "FileVersion": "1.2.0",
     "InternalName": "mcsim",
     "LegalCopyright": "Copyright © 2026 danxxxr",
     "LegalTrademarks": "",
     "OriginalFilename": "mcsim.exe",
     "PrivateBuild": "",
     "ProductName": "mcsim",
-    "ProductVersion": "1.2",
+    "ProductVersion": "1.2.0",
     "SpecialBuild": ""
   },
   "VarFileInfo": {
