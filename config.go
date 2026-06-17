@@ -361,7 +361,7 @@ save_svg = true
 # Maximum background curves on the chart (fewer = smaller file size)
 svg_max_curves = 60
 
-# Directory for saving files (. = current directory)
+# Directory for saving files (. = executable directory)
 output_dir = .
 `
 	return os.WriteFile(path, []byte(content), 0644)

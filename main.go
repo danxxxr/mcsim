@@ -12,9 +12,16 @@ import (
 )
 
 func main() {
+	// Get executable directory first
+	execPath, err := os.Executable()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to get executable path: %v\n", err)
+		os.Exit(1)
+	}
+	execDir := filepath.Dir(execPath)
 
 	// CLI flags
-	configPath := flag.String("config", "mcsim.ini", "Path to the configuration file")
+	configPath := flag.String("config", filepath.Join(execDir, "mcsim.ini"), "Path to the configuration file")
 	showVersion := flag.Bool("version", false, "Show version")
 	showHelp := flag.Bool("help", false, "Show help")
 	fBalance := flag.Float64("balance", 0, "Initial balance")
@@ -80,6 +87,10 @@ func main() {
 		params = DefaultParams()
 	} else {
 		fmt.Printf("[OK] Parameters loaded from %s\n\n", *configPath)
+	}
+
+	if params.OutputDir == "." {
+		params.OutputDir = execDir
 	}
 
 	// no-save and save-all take priority
