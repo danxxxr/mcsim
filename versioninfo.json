@@ -1,10 +1,10 @@
 {
   "FixedFileInfo": {
     "FileVersion": {
-      "Major": 1, "Minor": 2, "Patch": 0, "Build": 0
+      "Major": 1, "Minor": 2, "Patch": 1, "Build": 0
     },
     "ProductVersion": {
-      "Major": 1, "Minor": 2, "Patch": 0, "Build": 0
+      "Major": 1, "Minor": 2, "Patch": 1, "Build": 0
     },
     "FileFlagsMask": "3f",
     "FileFlags": "00",
@@ -16,14 +16,14 @@
     "Comments": "https://github.com/danxxxr/mcsim",
     "CompanyName": "danxxxr",
     "FileDescription": "Monte Carlo simulator for trading systems",
-    "FileVersion": "1.2.0",
+    "FileVersion": "1.2.1",
     "InternalName": "mcsim",
     "LegalCopyright": "Copyright © 2026 danxxxr",
     "LegalTrademarks": "",
     "OriginalFilename": "mcsim.exe",
     "PrivateBuild": "",
     "ProductName": "mcsim",
-    "ProductVersion": "1.2.0",
+    "ProductVersion": "1.2.1",
     "SpecialBuild": ""
   },
   "VarFileInfo": {
