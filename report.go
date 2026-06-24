@@ -153,12 +153,17 @@ func (s *Simulator) GenerateReport(res MCResults, timestamp string) string {
 	if std > 0 {
 		sharpe = m / std
 	}
+	recoveryFactor := 0.0
+	if dd.p50 > 0 {
+		recoveryFactor = ret.p50 / dd.p50
+	}
 
 	line("")
 	line("Value at Risk (95%%):        %.2f%%", var95)
 	line("Value at Risk (99%%):        %.2f%%", var99)
 	line("CVaR (95%%):                 %.2f%%", cvar95)
 	line("Sharpe ratio:               %.2f", sharpe)
+	line("Recovery Factor:            %.2f", recoveryFactor)
 	sep()
 
 	return sb.String()
