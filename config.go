@@ -26,6 +26,7 @@ type TradingParameters struct {
 	RRSigma          float64
 	SVGMaxCurves     int
 	OutputDir        string
+	RuinThreshold    float64
 }
 
 func DefaultParams() TradingParameters {
@@ -47,6 +48,7 @@ func DefaultParams() TradingParameters {
 		RRSigma:          0.1,
 		SVGMaxCurves:     200,
 		OutputDir:        ".",
+		RuinThreshold:    0.0,
 	}
 }
 
@@ -118,6 +120,15 @@ func ValidateParams(p TradingParameters) (errors []string, warnings []string) {
 	if p.SVGMaxCurves <= 0 {
 		errors = append(errors,
 			fmt.Sprintf("svg_max_curves = %d — must be greater than 0", p.SVGMaxCurves))
+	}
+
+	if p.RuinThreshold < 0 {
+		errors = append(errors,
+				fmt.Sprintf("ruin_threshold = %.2f — must be greater than or equal to 0", p.RuinThreshold))
+	}
+	if p.RuinThreshold >= p.InitialBalance {
+		errors = append(errors,
+				fmt.Sprintf("ruin_threshold = %.2f — must be less than initial_balance (%.2f)", p.RuinThreshold, p.InitialBalance))
 	}
 	// Warnings (simulation will run, but results may be unexpected)
 	if p.Commission < 0 {
@@ -290,6 +301,13 @@ func LoadConfig(path string) (TradingParameters, []string, error) {
 			}
 		case "output_dir":
 			p.OutputDir = val
+		case "ruin_threshold":
+			if v, err := strconv.ParseFloat(val, 64); err == nil {
+				p.RuinThreshold = v
+			} else {
+				parseErrors = append(parseErrors,
+						     fmt.Sprintf("ruin_threshold = %q — expected a number (e.g. 5000)", val))
+			}
 		}
 	}
 
@@ -329,6 +347,9 @@ simulation_count = 1000
 
 # Broker commission (0.01 = 1%), 0 = no commission
 commission = 0.0
+
+# Stop trading if balance drops below this amount, 0 = disabled
+ruin_threshold = 0
 
 # Reinvest profits: true = compounding, false = fixed size
 use_compounding = true
