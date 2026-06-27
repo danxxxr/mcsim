@@ -60,6 +60,8 @@ func main() {
 	fStress := flag.Bool("stress", false, "Run stress test")
 	flag.BoolVar(fStress, "st", false, "Run stress test (alias -stress)")
 	fStressSteps := flag.String("stress-steps", "10,20,30", "Stress test steps in percent (e.g. 5,15,25)")
+	fRuinThreshold := flag.Float64("ruin-threshold", 0, "Stop trading if balance drops below this amount (0 = disabled)")
+	flag.Float64Var(fRuinThreshold, "rt", 0, "Stop trading if balance drops below this amount (alias -ruin-threshold)")
 
 	flag.Parse()
 
@@ -142,6 +144,8 @@ func main() {
 			params.SVGMaxCurves = *fSVGMaxCurves
 		case "output", "o":
 			params.OutputDir = *fOutputDir
+		case "ruin-threshold", "rt":
+			params.RuinThreshold = *fRuinThreshold
 		}
 	})
 

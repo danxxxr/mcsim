@@ -33,6 +33,9 @@ func (s *Simulator) GenerateReport(res MCResults, timestamp string) string {
 	line("Reward:risk:         %.2f", p.WinMultiplier)
 	line("Risk per trade:      %.2f%%", p.RiskPercent*100)
 	line("Commission:          %.2f%%", p.Commission*100)
+	if p.RuinThreshold > 0 {
+		line("Ruin threshold:      $%.2f", p.RuinThreshold)
+	}
 	compStr := "No"
 	if p.UseCompounding {
 		compStr = "Yes"
@@ -122,14 +125,23 @@ func (s *Simulator) GenerateReport(res MCResults, timestamp string) string {
 		} else {
 			lossCount++
 		}
-		if b < initial*0.5 {
+		ruinThreshold := initial * 0.5
+		if p.RuinThreshold > 0 {
+			ruinThreshold = p.RuinThreshold
+		}
+		if b < ruinThreshold {
 			ruinCount++
 		}
 	}
 	line("Probabilities:")
 	line("  Profitable simulations:   %.2f%%", profitCount/n*100)
 	line("  Losing simulations:       %.2f%%", lossCount/n*100)
-	line("  Ruin (>50%% loss):         %.2f%%", ruinCount/n*100)
+	if p.RuinThreshold > 0 {
+		ruinPct := (1 - p.RuinThreshold/p.InitialBalance) * 100
+		line("  Ruin (>%.0f%% loss):         %.2f%%", ruinPct, ruinCount/n*100)
+	} else {
+		line("  Ruin (>50%% loss):           %.2f%%", ruinCount/n*100)
+	}
 
 	// VaR and CVaR calculated on return distribution
 	sortedRet := sortedCopy(res.ReturnsPercent)

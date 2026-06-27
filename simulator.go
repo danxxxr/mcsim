@@ -71,8 +71,10 @@ func (s *Simulator) RunSingle() SimResult {
 	for i := 0; i < p.TradeCount; i++ {
 		actualTrades++
 		// Balance reached zero — simulation is dead
-		if balance <= 0 {
-			balance = 0
+		if balance <= 0 || (p.RuinThreshold > 0 && balance <= p.RuinThreshold) {
+			if balance < 0 {
+				balance = 0
+			}
 			if p.SaveSVGFile {
 				equity = append(equity, balance)
 			}
