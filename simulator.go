@@ -7,6 +7,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+	"strings"
 )
 
 // SimResult holds the results of a single simulation run.
@@ -203,6 +204,26 @@ func (s *Simulator) RunMonteCarlo() MCResults {
 	var completed atomic.Int64
 	var wg sync.WaitGroup
 
+	// Progress bar goroutine — updates every 100ms independently of worker goroutines
+	stopProgress := make(chan struct{})
+	go func() {
+		ticker := time.NewTicker(100 * time.Millisecond)
+		defer ticker.Stop()
+		for {
+			select {
+				case <-ticker.C:
+					done := completed.Load()
+					total := int64(n)
+					width := 30
+					filled := int(done * int64(width) / total)
+					bar := strings.Repeat("=", filled) + strings.Repeat(" ", width-filled)
+					fmt.Printf("\r  [%s] %d/%d (%.0f%%)", bar, done, total, float64(done)/float64(total)*100)
+				case <-stopProgress:
+					return
+			}
+		}
+	}()
+
 	jobs := make(chan int, n)
 	for i := 0; i < n; i++ {
 		jobs <- i
@@ -234,15 +255,15 @@ func (s *Simulator) RunMonteCarlo() MCResults {
 				if workerSim.params.SaveSVGFile {
 					res.EquityCurves[i] = r.EquityCurve
 				}
-				done := completed.Add(1)
-				if done%100 == 0 {
-					fmt.Printf("  Completed: %d/%d\n", done, n)
-				}
+				completed.Add(1)
 			}
 		}(w)
 	}
 
 	wg.Wait()
+	close(stopProgress)
+	// Print final 100% state
+	fmt.Printf("\r  [%s] %d/%d (100%%)\n", strings.Repeat("=", 30), n, n)
 
 	elapsed := time.Since(start).Seconds()
 	res.ElapsedTime = elapsed
