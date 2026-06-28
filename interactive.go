@@ -10,7 +10,7 @@ import (
 
 // InteractiveSetup prompts the user to enter simulation parameters.
 // Press Enter to keep the current value from config.
-func InteractiveSetup(p TradingParameters) TradingParameters {
+func InteractiveSetup(p TradingParameters) (TradingParameters, bool) {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println(strings.Repeat("=", 70))
 	fmt.Println("# INTERACTIVE SETUP")
@@ -66,7 +66,12 @@ func InteractiveSetup(p TradingParameters) TradingParameters {
 		return InteractiveSetup(p)
 	}
 
-	return p
+	// Ask if user wants to run stress test
+	fmt.Printf("Run stress test? [n]: ")
+	input = strings.TrimSpace(readLine(reader))
+	runStress := input == "y" || input == "yes" || input == "1"
+
+	return p, runStress
 }
 
 func readFloat(reader *bufio.Reader, prompt string, current float64, format string) float64 {

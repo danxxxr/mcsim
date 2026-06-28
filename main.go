@@ -150,7 +150,11 @@ func main() {
 	})
 
 	if *fInteractive {
-		params = InteractiveSetup(params)
+		var runStress bool
+		params, runStress = InteractiveSetup(params)
+		if runStress {
+			*fStress = true
+		}
 	}
 
 	// Stop if there are parse errors
