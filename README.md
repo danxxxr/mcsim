@@ -47,6 +47,7 @@ On first run, `mcsim.ini` is created with default values. Edit it and run again.
 | `-trades` | `-t` | Number of trades |
 | `-sims` | `-s` | Number of simulations |
 | `-commission` | | Broker commission (0.01 = 1%) |
+| `-ruin-threshold` | `-rt` | Stop trading if balance drops below this amount (0 = disabled) |
 | `-compounding` | | Use compounding |
 | `-rr-model` | | RR model: `fixed`, `uniform`, `normal` |
 | `-rr-deviation` | | Deviation for uniform model (0.1 = ±10%) |
@@ -78,6 +79,7 @@ risk_percent = 0.01
 trade_count = 100
 simulation_count = 1000
 commission = 0.0
+ruin_threshold = 0
 use_compounding = true
 rr_model = fixed
 rr_deviation = 0.1
