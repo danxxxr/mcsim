@@ -33,6 +33,7 @@ func RunStressTest(params TradingParameters, steps []float64) []StressScenario {
 
 	for i, step := range steps {
 		p := params
+		p.SaveSVGFile = false
 		if step != 0 {
 			p.WinRate = math.Max(0, params.WinRate*(1+step))
 			p.WinMultiplier = math.Max(0, params.WinMultiplier*(1+step))
