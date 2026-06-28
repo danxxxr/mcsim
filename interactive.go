@@ -24,6 +24,7 @@ func InteractiveSetup(p TradingParameters) TradingParameters {
 	p.TradeCount = readInt(reader, "Trade count", p.TradeCount)
 	p.SimulationCount = readInt(reader, "Simulation count", p.SimulationCount)
 	p.Commission = readFloat(reader, "Commission (0.01 = 1%, 0 = disabled)", p.Commission, "%.2f")
+	p.RuinThreshold = readFloat(reader, "Ruin threshold in $ (0 = disabled)", p.RuinThreshold, "%.0f")
 
 	// Use compounding — prompt as y/n
 	compounding := "n"
