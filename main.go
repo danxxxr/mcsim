@@ -66,7 +66,7 @@ func main() {
 	flag.Parse()
 
 	if *showVersion {
-		fmt.Println("mcsim v1.2.1")
+		fmt.Println("mcsim v1.3.0")
 		os.Exit(0)
 	}
 
