@@ -47,6 +47,25 @@ func InteractiveSetup(p TradingParameters) TradingParameters {
 		p.RRSigma = readFloat(reader, "RR sigma (0.1 = 10%%)", p.RRSigma, "%.2f")
 	}
 
+	// Validate params and show errors/warnings
+	errors, warnings := ValidateParams(p)
+
+	if len(warnings) > 0 {
+		fmt.Println()
+		for _, w := range warnings {
+			fmt.Printf("[!] %s\n", w)
+		}
+	}
+
+	if len(errors) > 0 {
+		fmt.Println()
+		for _, e := range errors {
+			fmt.Printf("[X] %s\n", e)
+		}
+		fmt.Println("[->] Fix the values and try again")
+		return InteractiveSetup(p)
+	}
+
 	return p
 }
 
