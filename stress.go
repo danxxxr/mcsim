@@ -85,6 +85,24 @@ func GenerateStressReport(scenarios []StressScenario) string {
 			}
 		}
 
+		// Ruin count
+		ruinThreshold := p.InitialBalance * 0.5
+		if p.RuinThreshold > 0 {
+			ruinThreshold = p.RuinThreshold
+		}
+		ruinCount := 0.0
+		for _, b := range res.FinalBalances {
+			if b < ruinThreshold {
+				ruinCount++
+			}
+		}
+
+		// Recovery Factor
+		recoveryFactor := 0.0
+		if dd.p50 > 0 {
+			recoveryFactor = ret.p50 / dd.p50
+		}
+
 		line("│ %s (Win rate %.1f%% / RR %.2f)",
 			sc.Name, p.WinRate*100, p.WinMultiplier)
 		line("├─ Final balance:            $%.0f / $%.0f / $%.0f",
@@ -100,7 +118,14 @@ func GenerateStressReport(scenarios []StressScenario) string {
 		line("├─ Largest drawdown:         %.2f%%", maxFloat(res.MaxDrawdowns)*100)
 		line("├─ Longest loss streak:      %d", maxInt(res.MaxLossStreaks))
 		line("├─ Longest TTR:              %d", maxInt(res.MaxTradesToRecovery))
-		line("└─ Profitable simulations:   %.2f%%", profitCount/float64(n)*100)
+		line("├─ Profitable simulations:   %.2f%%", profitCount/float64(n)*100)
+		if p.RuinThreshold > 0 {
+			ruinPct := (1 - p.RuinThreshold/p.InitialBalance) * 100
+			line("├─ Ruin (>%.0f%% loss):       %.2f%%", ruinPct, ruinCount/float64(n)*100)
+		} else {
+			line("├─ Ruin (>50%% loss):         %.2f%%", ruinCount/float64(n)*100)
+		}
+		line("└─ Recovery Factor:          %.2f", recoveryFactor)
 		line("")
 	}
 
