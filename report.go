@@ -140,7 +140,7 @@ func (s *Simulator) GenerateReport(res MCResults, timestamp string) string {
 		ruinPct := (1 - p.RuinThreshold/p.InitialBalance) * 100
 		line("  Ruin (>%.0f%% loss):         %.2f%%", ruinPct, ruinCount/n*100)
 	} else {
-		line("  Ruin (>50%% loss):           %.2f%%", ruinCount/n*100)
+		line("  Ruin (>50%% loss):         %.2f%%", ruinCount/n*100)
 	}
 
 	// VaR and CVaR calculated on return distribution
